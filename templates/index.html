@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Load Shedding Tracker — Dhaka</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:       #22c55e;
+      --green-glow:  rgba(34, 197, 94, 0.35);
+      --green-soft:  rgba(34, 197, 94, 0.12);
+      --red:         #f43f5e;
+      --red-glow:    rgba(244, 63, 94, 0.35);
+      --red-soft:    rgba(244, 63, 94, 0.12);
+      --yellow:      #f59e0b;
+      --yellow-soft: rgba(245, 158, 11, 0.12);
+      --glass-bg:    rgba(255, 255, 255, 0.08);
+      --glass-border:rgba(255, 255, 255, 0.16);
+      --glass-hover: rgba(255, 255, 255, 0.14);
+      --text-primary:  #f1f5f9;
+      --text-secondary:#94a3b8;
+      --text-muted:    #64748b;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #060b18;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px 60px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ── Animated mesh background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(16, 185, 129, 0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 60% 30%, rgba(139, 92, 246, 0.10) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* floating orbs */
+    body::after {
+      content: '';
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%);
+      top: -100px;
+      right: -150px;
+      pointer-events: none;
+      z-index: 0;
+      animation: orb-drift 18s ease-in-out infinite alternate;
+    }
+
+    @keyframes orb-drift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(40px, 60px) scale(1.1); }
+    }
+
+    /* ── Main wrapper ── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 520px;
+    }
+
+    /* ── Top branding strip ── */
+    .brand-strip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      padding: 0 2px;
+    }
+    .brand-pill {
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #a5b4fc;
+      font-family: 'Syne', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+    }
+    .brand-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(99,102,241,0.3), transparent);
+    }
+
+    /* ── Main glass card ── */
+    .card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 32px 28px 28px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04) inset,
+        0 32px 64px rgba(0, 0, 0, 0.4),
+        0 4px 16px rgba(0, 0, 0, 0.3);
+      animation: card-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(24px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0)   scale(1);    }
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 28px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .header-icon {
+      font-size: 40px;
+      line-height: 1;
+      margin-bottom: 10px;
+      display: block;
+      filter: drop-shadow(0 0 12px rgba(250, 204, 21, 0.5));
+      animation: icon-pulse 3s ease-in-out infinite;
+    }
+    @keyframes icon-pulse {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(250,204,21,0.4)); }
+      50%       { filter: drop-shadow(0 0 20px rgba(250,204,21,0.7)); }
+    }
+    .header h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .header p {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    /* ── Section labels ── */
+    label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* ── Dropdown ── */
+    .select-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .select-wrapper::after {
+      content: '▾';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 14px;
+    }
+    select {
+      width: 100%;
+      padding: 13px 40px 13px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14.5px;
+      font-weight: 500;
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      background: var(--glass-bg);
+      color: var(--text-primary);
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    select:focus {
+      outline: none;
+      border-color: rgba(99, 102, 241, 0.6);
+      background: rgba(99, 102, 241, 0.06);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+    }
+    select option {
+      background: #1e293b;
+      color: var(--text-primary);
+    }
+
+    /* ── Status display card ── */
+    .status-box {
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
+      padding: 22px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      background: var(--glass-bg);
+      transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .status-box::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    .status-box.ON {
+      background: var(--green-soft);
+      border-color: rgba(34, 197, 94, 0.3);
+      box-shadow: 0 0 32px rgba(34, 197, 94, 0.08), inset 0 1px 0 rgba(34,197,94,0.12);
+    }
+    .status-box.ON::before {
+      background: radial-gradient(ellipse at 50% 0%, var(--green-glow) 0%, transparent 70%);
+      opacity: 0.4;
+    }
+
+    .status-box.OFF {
+      background: var(--red-soft);
+      border-color: rgba(244, 63, 94, 0.3);
+      box-shadow: 0 0 32px rgba(244, 63, 94, 0.08), inset 0 1px 0 rgba(244,63,94,0.12);
+    }
+    .status-box.OFF::before {
+      background: radial-gradient(ellipse at 50% 0%, var(--red-glow) 0%, transparent 70%);
+      opacity: 0.4;
+    }
+
+    .status-box.UNKNOWN {
+      background: var(--glass-bg);
+      border-color: var(--glass-border);
+      box-shadow: none;
+    }
+
+    .status-box .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .status-box .area {
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 14px;
+    }
+
+    #status-icon {
+      font-size: 44px;
+      line-height: 1;
+      margin-bottom: 8px;
+      display: block;
+      transition: filter 0.4s ease, transform 0.4s ease;
+      position: relative;
+      z-index: 1;
+    }
+    .status-box.ON  #status-icon { filter: drop-shadow(0 0 16px var(--green-glow)); }
+    .status-box.OFF #status-icon { filter: drop-shadow(0 0 16px var(--red-glow)); }
+
+    #status-text {
+      font-family: 'Syne', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      transition: color 0.4s ease;
+      position: relative;
+      z-index: 1;
+    }
+    #status-text.ON      { color: var(--green); }
+    #status-text.OFF     { color: var(--red);   }
+    #status-text.UNKNOWN { color: var(--text-muted); }
+
+    .vote-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Vote breakdown ── */
+    .vote-breakdown {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      display: none;
+      position: relative;
+      z-index: 1;
+    }
+    .vote-breakdown.visible { display: block; }
+
+    .vote-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+    .vote-label {
+      width: 36px;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      text-align: right;
+      flex-shrink: 0;
+      letter-spacing: 0.05em;
+    }
+    .vote-label.on  { color: var(--green); }
+    .vote-label.off { color: var(--red);   }
+
+    .bar-track {
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 100px;
+      width: 0%;
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .bar-fill.on  { background: linear-gradient(90deg, #16a34a, var(--green)); }
+    .bar-fill.off { background: linear-gradient(90deg, #be123c, var(--red));   }
+
+    .vote-num {
+      width: 28px;
+      font-weight: 700;
+      font-size: 13px;
+      text-align: left;
+      flex-shrink: 0;
+    }
+    .vote-num.on  { color: var(--green); }
+    .vote-num.off { color: var(--red);   }
+
+    .vote-total {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    /* ── Confidence badge ── */
+    #confidence-text {
+      font-size: 12.5px;
+      font-weight: 600;
+      margin-top: 10px;
+      padding: 5px 16px;
+      border-radius: 100px;
+      display: inline-block;
+      letter-spacing: 0.02em;
+      transition: background 0.3s, color 0.3s;
+    }
+    #confidence-text.high   { background: rgba(34,197,94,0.15);  color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+    #confidence-text.medium { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.25); }
+    #confidence-text.low    { background: rgba(244,63,94,0.15);  color: #fb7185; border: 1px solid rgba(244,63,94,0.25); }
+    #confidence-text.none   { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.08); }
+
+    /* ── Buttons ── */
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .btn-row button {
+      flex: 1;
+      padding: 14px 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14.5px;
+      font-weight: 600;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, opacity 0.15s, background 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-row button::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.15s;
+    }
+    .btn-row button:hover:not(:disabled) {
+      transform: translateY(-3px) scale(1.02);
+    }
+    .btn-row button:hover:not(:disabled)::after {
+      background: rgba(255,255,255,0.07);
+    }
+    .btn-row button:active:not(:disabled) {
+      transform: translateY(0) scale(0.98);
+    }
+    .btn-row button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    #btn-on {
+      background: linear-gradient(135deg, #16a34a, #22c55e);
+      color: white;
+      border-color: rgba(34,197,94,0.4);
+      box-shadow: 0 4px 20px rgba(34,197,94,0.25), 0 1px 0 rgba(255,255,255,0.15) inset;
+    }
+    #btn-on:hover:not(:disabled) {
+      box-shadow: 0 8px 28px rgba(34,197,94,0.4), 0 1px 0 rgba(255,255,255,0.15) inset;
+    }
+    #btn-off {
+      background: linear-gradient(135deg, #be123c, #f43f5e);
+      color: white;
+      border-color: rgba(244,63,94,0.4);
+      box-shadow: 0 4px 20px rgba(244,63,94,0.25), 0 1px 0 rgba(255,255,255,0.15) inset;
+    }
+    #btn-off:hover:not(:disabled) {
+      box-shadow: 0 8px 28px rgba(244,63,94,0.4), 0 1px 0 rgba(255,255,255,0.15) inset;
+    }
+
+    /* ── Feedback messages ── */
+    #message {
+      font-size: 13.5px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      display: none;
+      line-height: 1.5;
+      font-weight: 500;
+      animation: msg-in 0.25s ease both;
+    }
+    @keyframes msg-in {
+      from { opacity: 0; transform: translateY(-4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #message.success {
+      background: rgba(34,197,94,0.12);
+      color: #4ade80;
+      border: 1px solid rgba(34,197,94,0.25);
+      display: block;
+    }
+    #message.error {
+      background: rgba(244,63,94,0.12);
+      color: #fb7185;
+      border: 1px solid rgba(244,63,94,0.25);
+      display: block;
+    }
+    #message.info {
+      background: rgba(99,102,241,0.12);
+      color: #a5b4fc;
+      border: 1px solid rgba(99,102,241,0.25);
+      display: block;
+    }
+
+    /* ── Last updated ── */
+    #last-updated {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      min-height: 18px;
+    }
+    #last-updated span { font-weight: 600; color: var(--text-secondary); }
+
+    /* ── Auto-refresh indicator ── */
+    #refresh-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 18px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    #refresh-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    #refresh-dot.active {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green-glow);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1;   transform: scale(1);    box-shadow: 0 0 6px var(--green-glow); }
+      50%       { opacity: 0.5; transform: scale(0.8);  box-shadow: 0 0 12px var(--green-glow); }
+    }
+
+    /* ── Recent reports panel ── */
+    #recent-panel {
+      display: none;
+      margin-top: 18px;
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.03);
+      animation: panel-in 0.3s ease both;
+    }
+    @keyframes panel-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    #recent-panel.visible { display: block; }
+
+    .recent-header {
+      background: rgba(255,255,255,0.04);
+      padding: 11px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .recent-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s;
+    }
+    .recent-row:last-child { border-bottom: none; }
+    .recent-row:hover { background: rgba(255,255,255,0.04); }
+
+    .recent-user { color: var(--text-secondary); flex: 1; font-size: 13px; }
+    .recent-time { color: var(--text-muted); font-size: 11.5px; flex: 1; text-align: center; }
+
+    .recent-status {
+      font-weight: 700;
+      font-size: 11px;
+      padding: 3px 12px;
+      border-radius: 100px;
+      flex: 0 0 auto;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: 0.05em;
+    }
+    .recent-status.ON  { background: rgba(34,197,94,0.15);  color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+    .recent-status.OFF { background: rgba(244,63,94,0.15);  color: #fb7185; border: 1px solid rgba(244,63,94,0.2); }
+
+    .recent-empty {
+      padding: 18px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+    .footer span {
+      display: inline-block;
+      width: 3px;
+      height: 3px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      vertical-align: middle;
+      margin: 0 8px;
+      opacity: 0.5;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      body { padding: 20px 12px 40px; }
+      .card { padding: 24px 18px 20px; border-radius: 20px; }
+      .header h1 { font-size: 22px; }
+      #status-text { font-size: 30px; }
+      #status-icon { font-size: 38px; }
+    }
+    @media (max-width: 360px) {
+      .btn-row button { font-size: 13px; padding: 12px 6px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <div class="brand-strip">
+    <div class="brand-pill">Live Dashboard</div>
+    <div class="brand-line"></div>
+  </div>
+
+  <div class="card">
+
+    <!-- Header -->
+    <div class="header">
+      <span class="header-icon">⚡</span>
+      <h1>Load Shedding Tracker</h1>
+      <p>Community-powered electricity status · Dhaka</p>
+    </div>
+
+    <!-- Location Dropdown -->
+    <label for="location-select">Select your area</label>
+    <div class="select-wrapper">
+      <select id="location-select" onchange="onLocationChange()">
+        <option value="">— Choose a location —</option>
+      </select>
+    </div>
+
+    <!-- Status Display -->
+    <div class="status-box UNKNOWN">
+      <div class="label">Current electricity status</div>
+      <div class="area" id="area-name">No area selected</div>
+      <div id="status-icon">⚡</div>
+      <div id="status-text" class="UNKNOWN">—</div>
+      <div class="vote-count" id="vote-info"></div>
+
+      <!-- Vote Breakdown -->
+      <div class="vote-breakdown" id="vote-breakdown">
+        <div class="vote-row">
+          <span class="vote-label on">ON</span>
+          <div class="bar-track"><div class="bar-fill on" id="bar-on"></div></div>
+          <span class="vote-num on" id="num-on">0</span>
+        </div>
+        <div class="vote-row">
+          <span class="vote-label off">OFF</span>
+          <div class="bar-track"><div class="bar-fill off" id="bar-off"></div></div>
+          <span class="vote-num off" id="num-off">0</span>
+        </div>
+        <div class="vote-total" id="vote-total">0 reports in last 15 min</div>
+        <div id="last-updated"></div>
+        <div style="text-align:center; margin-top: 10px;">
+          <span id="confidence-text" class="none">No data yet</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report Buttons -->
+    <div class="btn-row">
+      <button id="btn-on"  onclick="submitReport('ON')"  disabled>✅ Report ON</button>
+      <button id="btn-off" onclick="submitReport('OFF')" disabled>❌ Report OFF</button>
+    </div>
+
+    <!-- Feedback Message -->
+    <div id="message"></div>
+
+    <!-- Recent Reports Panel -->
+    <div id="recent-panel">
+      <div class="recent-header">🕑 Last 5 Reports</div>
+      <div id="recent-list">
+        <div class="recent-empty">No reports yet for this area.</div>
+      </div>
+    </div>
+
+    <!-- Auto-refresh indicator -->
+    <div id="refresh-indicator">
+      <div id="refresh-dot"></div>
+      <span id="refresh-label">Select an area to start auto-refresh</span>
+    </div>
+
+    <div class="footer">
+      User ID: 1 (demo)<span></span>Reports count for 15 minutes
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API     = "";
+  const USER_ID = 1;
+
+  window.onload = function () {
+    fetch(API + "/locations")
+      .then(res => res.json())
+      .then(locations => {
+        const sel = document.getElementById("location-select");
+        locations.forEach(loc => {
+          const opt       = document.createElement("option");
+          opt.value       = loc.location_id;
+          opt.textContent = loc.area_name + " — " + loc.city;
+          sel.appendChild(opt);
+        });
+      })
+      .catch(() => {
+        showMessage("❌ Cannot reach server. Make sure Flask is running.", "error");
+      });
+  };
+
+  function onLocationChange() {
+    const id = document.getElementById("location-select").value;
+    clearMessage();
+    setStatus("—", "UNKNOWN");
+    document.getElementById("area-name").textContent = "Loading...";
+    document.getElementById("vote-info").textContent = "";
+    setButtonsDisabled(true);
+
+    if (!id) {
+      document.getElementById("area-name").textContent = "No area selected";
+      stopRefresh();
+      return;
+    }
+
+    fetch(API + "/status/" + id)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("area-name").textContent = data.area_name + ", " + data.city;
+        setStatus(data.current_status, data.current_status);
+        setButtonsDisabled(false);
+        updateVotes(id);
+        updateRecent(id);
+        startRefresh(id);
+      })
+      .catch(() => showMessage("❌ Could not load status.", "error"));
+  }
+
+  function submitReport(status) {
+    const id = document.getElementById("location-select").value;
+    if (!id) return;
+
+    setButtonsDisabled(true);
+    clearMessage();
+
+    fetch(API + "/report", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
+        user_id:     USER_ID,
+        location_id: parseInt(id),
+        status:      status
+      })
+    })
+    .then(res => res.json().then(data => ({ ok: res.ok, status: res.status, data })))
+    .then(({ ok, status: httpStatus, data }) => {
+      if (ok) {
+        setStatus(data.area_status_now, data.area_status_now);
+        showMessage("✅ Report submitted! Area is now: " + data.area_status_now, "success");
+        renderVotes(data.on_votes, data.off_votes, data.total_votes);
+        renderLastUpdated(data.last_report_time);
+        renderConfidence(data.area_status_now, data.confidence_pct, data.total_votes);
+        updateRecent(parseInt(document.getElementById("location-select").value));
+      } else if (httpStatus === 429) {
+        showMessage("⏳ " + data.error, "info");
+      } else {
+        showMessage("❌ " + (data.error || "Something went wrong."), "error");
+      }
+    })
+    .catch(() => showMessage("❌ Could not submit report.", "error"))
+    .finally(() => setButtonsDisabled(false));
+  }
+
+  function setStatus(text, cssClass) {
+    const status = cssClass || "UNKNOWN";
+
+    const textEl = document.getElementById("status-text");
+    textEl.textContent = text || "—";
+    textEl.className   = status;
+
+    const box = document.querySelector(".status-box");
+    box.classList.remove("ON", "OFF", "UNKNOWN");
+    box.classList.add(status);
+
+    const icon = document.getElementById("status-icon");
+    if      (status === "ON")  icon.textContent = "✅";
+    else if (status === "OFF") icon.textContent = "❌";
+    else                       icon.textContent = "⚡";
+  }
+
+  function timeAgo(sqlTimestamp) {
+    if (!sqlTimestamp) return null;
+    const reportDate = new Date(sqlTimestamp.replace(" ", "T"));
+    const now        = new Date();
+    const diffMs     = now - reportDate;
+    const diffSec    = Math.floor(diffMs / 1000);
+
+    if (diffSec <  10) return "just now";
+    if (diffSec <  60) return diffSec + " seconds ago";
+
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin === 1) return "1 minute ago";
+    if (diffMin <  60) return diffMin + " minutes ago";
+
+    const diffHr = Math.floor(diffMin / 60);
+    return diffHr + " hour" + (diffHr > 1 ? "s" : "") + " ago";
+  }
+
+  function renderLastUpdated(sqlTimestamp) {
+    const el  = document.getElementById("last-updated");
+    const ago = timeAgo(sqlTimestamp);
+    if (ago) {
+      el.innerHTML = "🕐 Last updated: <span>" + ago + "</span>";
+    } else {
+      el.textContent = "";
+    }
+  }
+
+  function renderConfidence(status, confidence_pct, total) {
+    const el = document.getElementById("confidence-text");
+
+    if (total === 0 || status === "UNKNOWN") {
+      el.textContent = "No reports yet";
+      el.className   = "none";
+      return;
+    }
+
+    const pct = Math.round(confidence_pct);
+    el.textContent = status + " (" + pct + "% confidence)";
+
+    if      (pct >= 70) el.className = "high";
+    else if (pct >= 50) el.className = "medium";
+    else                el.className = "low";
+  }
+
+  function setButtonsDisabled(state) {
+    document.getElementById("btn-on").disabled  = state;
+    document.getElementById("btn-off").disabled = state;
+  }
+
+  function showMessage(text, type) {
+    const el   = document.getElementById("message");
+    el.textContent = text;
+    el.className   = type;
+  }
+
+  function clearMessage() {
+    const el = document.getElementById("message");
+    el.textContent = "";
+    el.className   = "";
+    el.style.display = "none";
+  }
+
+  function updateVotes(location_id) {
+    fetch(API + "/votes/" + location_id)
+      .then(res => res.json())
+      .then(data => {
+        renderVotes(data.on_votes, data.off_votes, data.total_votes);
+        renderLastUpdated(data.last_report_time);
+        const status = document.getElementById("status-text").textContent;
+        renderConfidence(status, data.confidence_pct, data.total_votes);
+      })
+      .catch(() => {});
+  }
+
+  const REFRESH_INTERVAL = 10;
+  let   refreshTimer     = null;
+  let   countdownTimer   = null;
+  let   secondsLeft      = REFRESH_INTERVAL;
+
+  function refreshData() {
+    const id = document.getElementById("location-select").value;
+    if (!id) return;
+
+    fetch(API + "/status/" + id)
+      .then(res => res.json())
+      .then(data => { setStatus(data.current_status, data.current_status); })
+      .catch(() => {});
+
+    updateVotes(id);
+    updateRecent(id);
+    secondsLeft = REFRESH_INTERVAL;
+  }
+
+  function startRefresh(locationId) {
+    stopRefresh();
+    secondsLeft = REFRESH_INTERVAL;
+    updateCountdownLabel();
+    document.getElementById("refresh-dot").classList.add("active");
+    countdownTimer = setInterval(function () {
+      secondsLeft--;
+      if (secondsLeft <= 0) secondsLeft = REFRESH_INTERVAL;
+      updateCountdownLabel();
+    }, 1000);
+    refreshTimer = setInterval(refreshData, REFRESH_INTERVAL * 1000);
+  }
+
+  function stopRefresh() {
+    clearInterval(refreshTimer);
+    clearInterval(countdownTimer);
+    refreshTimer   = null;
+    countdownTimer = null;
+    secondsLeft    = REFRESH_INTERVAL;
+    document.getElementById("refresh-dot").classList.remove("active");
+    document.getElementById("refresh-label").textContent = "Select an area to start auto-refresh";
+  }
+
+  function updateCountdownLabel() {
+    document.getElementById("refresh-label").textContent =
+      "Auto-refreshing in " + secondsLeft + "s";
+  }
+
+  function updateRecent(location_id) {
+    fetch(API + "/recent/" + location_id)
+      .then(res => res.json())
+      .then(rows => renderRecent(rows))
+      .catch(() => {});
+  }
+
+  function renderRecent(rows) {
+    const panel = document.getElementById("recent-panel");
+    const list  = document.getElementById("recent-list");
+
+    list.innerHTML = "";
+
+    if (rows.length === 0) {
+      list.innerHTML = '<div class="recent-empty">No reports yet for this area.</div>';
+      panel.classList.remove("visible");
+      return;
+    }
+
+    rows.forEach(function (r) {
+      const ago = timeAgo(r.report_time) || r.report_time;
+      const row = document.createElement("div");
+      row.className = "recent-row";
+      row.innerHTML =
+        '<span class="recent-user">👤 ' + r.username + '</span>' +
+        '<span class="recent-time">' + ago + '</span>' +
+        '<span class="recent-status ' + r.status_reported + '">' + r.status_reported + '</span>';
+      list.appendChild(row);
+    });
+
+    panel.classList.add("visible");
+  }
+
+  function renderVotes(onVotes, offVotes, total) {
+    document.getElementById("num-on").textContent  = onVotes;
+    document.getElementById("num-off").textContent = offVotes;
+    document.getElementById("vote-total").textContent =
+      total + " report" + (total !== 1 ? "s" : "") + " in last 15 min";
+
+    const onPct  = total > 0 ? Math.round((onVotes  / total) * 100) : 0;
+    const offPct = total > 0 ? Math.round((offVotes / total) * 100) : 0;
+
+    document.getElementById("bar-on").style.width  = onPct  + "%";
+    document.getElementById("bar-off").style.width = offPct + "%";
+
+    document.getElementById("vote-breakdown").classList.add("visible");
+  }
+</script>
+
+</body>
+</html>
