@@ -600,150 +600,6 @@
       opacity: 0.5;
     }
 
-    /* ── Subscribe button (single, full-width) ── */
-    .btn-subscribe {
-      width: 100%;
-      margin-top: 12px;
-      padding: 12px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s, background 0.25s;
-      border: 1px solid rgba(99,102,241,0.35);
-      background: rgba(99,102,241,0.15);
-      color: #a5b4fc;
-    }
-    .btn-subscribe:hover:not(:disabled) {
-      transform: translateY(-2px) scale(1.01);
-      background: rgba(99,102,241,0.25);
-      box-shadow: 0 6px 20px rgba(99,102,241,0.2);
-    }
-    .btn-subscribe:disabled { opacity: 0.3; cursor: not-allowed; }
-    .btn-subscribe.subscribed {
-      background: rgba(34,197,94,0.12);
-      color: #4ade80;
-      border-color: rgba(34,197,94,0.3);
-    }
-    .btn-subscribe.subscribed:hover:not(:disabled) {
-      background: rgba(244,63,94,0.12);
-      color: #fb7185;
-      border-color: rgba(244,63,94,0.3);
-      box-shadow: 0 6px 20px rgba(244,63,94,0.15);
-    }
-
-    /* ── Generic collapsible panel (reused for subscriptions, stats, logs) ── */
-    .x-panel {
-      margin-top: 14px;
-      border: 1px solid var(--glass-border);
-      border-radius: 16px;
-      overflow: hidden;
-      background: rgba(255,255,255,0.03);
-    }
-    .x-panel-header {
-      background: rgba(255,255,255,0.04);
-      padding: 11px 16px;
-      font-size: 11px;
-      font-weight: 600;
-      font-family: 'Syne', sans-serif;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .x-panel-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 16px;
-      font-size: 13px;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      transition: background 0.15s;
-    }
-    .x-panel-row:last-child { border-bottom: none; }
-    .x-panel-row:hover { background: rgba(255,255,255,0.04); }
-    .x-panel-empty {
-      padding: 18px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    /* ── Stats grid ── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      padding: 14px;
-    }
-    .stat-cell {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      padding: 12px 14px;
-      text-align: center;
-    }
-    .stat-val {
-      font-family: 'Syne', sans-serif;
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--text-primary);
-      line-height: 1.1;
-    }
-    .stat-lbl {
-      font-size: 10.5px;
-      color: var(--text-muted);
-      margin-top: 4px;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-    }
-
-    /* ── Audit log action badge ── */
-    .log-action {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 10px;
-      border-radius: 100px;
-      background: rgba(99,102,241,0.15);
-      color: #a5b4fc;
-      border: 1px solid rgba(99,102,241,0.2);
-      font-family: 'Syne', sans-serif;
-      letter-spacing: 0.06em;
-    }
-
-    /* ── Subscriptions status chip inside panel ── */
-    .sub-status {
-      font-size: 10.5px;
-      font-weight: 700;
-      padding: 2px 10px;
-      border-radius: 100px;
-      font-family: 'Syne', sans-serif;
-    }
-    .sub-status.ON  { background: rgba(34,197,94,0.15); color:#4ade80; border:1px solid rgba(34,197,94,0.2); }
-    .sub-status.OFF { background: rgba(244,63,94,0.15); color:#fb7185; border:1px solid rgba(244,63,94,0.2); }
-    .sub-status.UNKNOWN { background: rgba(255,255,255,0.06); color:var(--text-muted); border:1px solid rgba(255,255,255,0.1); }
-
-    /* ── Stats toggle button ── */
-    #btn-stats {
-      width: 100%;
-      margin-top: 14px;
-      padding: 11px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13.5px;
-      font-weight: 600;
-      border-radius: 12px;
-      cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.05);
-      color: var(--text-secondary);
-      transition: background 0.2s, transform 0.15s;
-    }
-    #btn-stats:hover {
-      background: rgba(255,255,255,0.09);
-      transform: translateY(-1px);
-    }
-
     /* ── Responsive ── */
     @media (max-width: 480px) {
       body { padding: 20px 12px 40px; }
@@ -754,7 +610,6 @@
     }
     @media (max-width: 360px) {
       .btn-row button { font-size: 13px; padding: 12px 6px; }
-      .stats-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -829,49 +684,6 @@
       </div>
     </div>
 
-    <!-- ══ MANY-TO-MANY: Subscribe / Unsubscribe button ══
-         Calls POST /subscribe or DELETE /subscribe.
-         The subscriptions table creates a M:N link between
-         users and locations. [MANY-TO-MANY] -->
-    <button class="btn-subscribe" id="btn-subscribe" disabled
-            onclick="toggleSubscribe()">
-      🔔 Follow This Area
-    </button>
-
-    <!-- ══ TRIGGER: Audit Log Panel ══
-         Populated automatically by trg_log_report_insert.
-         This panel just reads what the trigger wrote. [TRIGGER] -->
-    <div class="x-panel" id="log-panel" style="display:none">
-      <div class="x-panel-header">🗒️ Audit Log (trigger-generated)</div>
-      <div id="log-list"><div class="x-panel-empty">No log entries yet.</div></div>
-    </div>
-
-    <!-- ══ MANY-TO-MANY: My Subscriptions Panel ══
-         Lists all locations the demo user follows.
-         Populated via JOIN: users → subscriptions → locations [MANY-TO-MANY] -->
-    <div class="x-panel" id="sub-panel" style="display:none">
-      <div class="x-panel-header">📍 My Followed Areas</div>
-      <div id="sub-list"><div class="x-panel-empty">Not following any areas yet.</div></div>
-    </div>
-
-    <!-- ══ AGG FUNCTIONS + CALC FIELD: System Stats Panel ══
-         Uses COUNT, MAX, GROUP BY, and a calculated off_rate_pct
-         field computed entirely in SQL. [AGG FUNCTIONS][CALC FIELD] -->
-    <button id="btn-stats" onclick="toggleStats()">📊 Show System Stats</button>
-    <div class="x-panel" id="stats-panel" style="display:none">
-      <div class="x-panel-header">📊 System-wide Statistics</div>
-      <div class="stats-grid" id="stats-grid">
-        <div class="stat-cell"><div class="stat-val" id="st-total">—</div><div class="stat-lbl">Total Reports</div></div>
-        <div class="stat-cell"><div class="stat-val" id="st-off-rate" style="color:var(--red)">—</div><div class="stat-lbl">Off Rate %</div></div>
-        <div class="stat-cell"><div class="stat-val" id="st-subs" style="color:#a5b4fc">—</div><div class="stat-lbl">Subscriptions</div></div>
-        <div class="stat-cell"><div class="stat-val" id="st-logs" style="color:var(--yellow)">—</div><div class="stat-lbl">Audit Logs</div></div>
-        <div class="stat-cell" style="grid-column:1/-1">
-          <div class="stat-val" id="st-busiest" style="font-size:16px">—</div>
-          <div class="stat-lbl">Most Active Area</div>
-        </div>
-      </div>
-    </div>
-
     <!-- Auto-refresh indicator -->
     <div id="refresh-indicator">
       <div id="refresh-dot"></div>
@@ -890,7 +702,6 @@
   const USER_ID = 1;
 
   window.onload = function () {
-    loadSubscriptions();  // [MANY-TO-MANY] populate My Followed Areas on load
     fetch(API + "/locations")
       .then(res => res.json())
       .then(locations => {
@@ -927,11 +738,8 @@
         document.getElementById("area-name").textContent = data.area_name + ", " + data.city;
         setStatus(data.current_status, data.current_status);
         setButtonsDisabled(false);
-        document.getElementById("btn-subscribe").disabled = false;
         updateVotes(id);
         updateRecent(id);
-        loadLogs(id);                // [TRIGGER] show audit log
-        checkSubscription(parseInt(id)); // [MANY-TO-MANY] check follow status
         startRefresh(id);
       })
       .catch(() => showMessage("❌ Could not load status.", "error"));
@@ -961,9 +769,7 @@
         renderVotes(data.on_votes, data.off_votes, data.total_votes);
         renderLastUpdated(data.last_report_time);
         renderConfidence(data.area_status_now, data.confidence_pct, data.total_votes);
-        const locId = parseInt(document.getElementById("location-select").value);
-        updateRecent(locId);
-        loadLogs(locId);   // [TRIGGER] refresh audit log immediately
+        updateRecent(parseInt(document.getElementById("location-select").value));
       } else if (httpStatus === 429) {
         showMessage("⏳ " + data.error, "info");
       } else {
@@ -1082,7 +888,6 @@
 
     updateVotes(id);
     updateRecent(id);
-    loadLogs(id);       // [TRIGGER] keep audit log fresh
     secondsLeft = REFRESH_INTERVAL;
   }
 
@@ -1160,167 +965,6 @@
     document.getElementById("bar-off").style.width = offPct + "%";
 
     document.getElementById("vote-breakdown").classList.add("visible");
-  }
-
-  // ── track which locations the user is following in memory
-  const followedIds = new Set();
-
-  // ══════════════════════════════════════════════
-  //  MANY-TO-MANY: Subscribe / Unsubscribe
-  //  POST /subscribe  or  DELETE /subscribe
-  // ══════════════════════════════════════════════
-  function toggleSubscribe() {
-    const id = parseInt(document.getElementById("location-select").value);
-    if (!id) return;
-
-    const isFollowing = followedIds.has(id);
-    const method = isFollowing ? "DELETE" : "POST";
-
-    fetch(API + "/subscribe", {
-      method:  method,
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify({ user_id: USER_ID, location_id: id })
-    })
-    .then(res => res.json())
-    .then(() => {
-      if (isFollowing) {
-        followedIds.delete(id);
-      } else {
-        followedIds.add(id);
-      }
-      updateSubscribeButton(id);
-      loadSubscriptions();
-    })
-    .catch(() => {});
-  }
-
-  function updateSubscribeButton(id) {
-    const btn = document.getElementById("btn-subscribe");
-    if (!id) {
-      btn.textContent = "🔔 Follow This Area";
-      btn.classList.remove("subscribed");
-      return;
-    }
-    if (followedIds.has(id)) {
-      btn.textContent = "✅ Following — Click to Unfollow";
-      btn.classList.add("subscribed");
-    } else {
-      btn.textContent = "🔔 Follow This Area";
-      btn.classList.remove("subscribed");
-    }
-  }
-
-  // Called on location change to check if already subscribed
-  function checkSubscription(location_id) {
-    loadSubscriptions();   // reload the full list to stay in sync
-    updateSubscribeButton(location_id);
-  }
-
-  // ══════════════════════════════════════════════
-  //  MANY-TO-MANY: load all subscriptions for demo_user
-  //  GET /subscriptions/1
-  // ══════════════════════════════════════════════
-  function loadSubscriptions() {
-    fetch(API + "/subscriptions/" + USER_ID)
-      .then(res => res.json())
-      .then(rows => {
-        // Sync in-memory set
-        followedIds.clear();
-        rows.forEach(r => followedIds.add(r.location_id));
-
-        const currentId = parseInt(document.getElementById("location-select").value);
-        updateSubscribeButton(currentId);
-
-        const list  = document.getElementById("sub-list");
-        const panel = document.getElementById("sub-panel");
-
-        list.innerHTML = "";
-
-        if (rows.length === 0) {
-          list.innerHTML = '<div class="x-panel-empty">Not following any areas yet.</div>';
-          panel.style.display = "none";
-          return;
-        }
-
-        rows.forEach(function(r) {
-          const row = document.createElement("div");
-          row.className = "x-panel-row";
-          row.innerHTML =
-            '<span style="color:var(--text-secondary);flex:1">📍 ' + r.area_name + '</span>' +
-            '<span class="sub-status ' + r.current_status + '">' + r.current_status + '</span>';
-          list.appendChild(row);
-        });
-
-        panel.style.display = "block";
-      })
-      .catch(() => {});
-  }
-
-  // ══════════════════════════════════════════════
-  //  TRIGGER: load audit log for current location
-  //  GET /logs/<location_id>
-  // ══════════════════════════════════════════════
-  function loadLogs(location_id) {
-    fetch(API + "/logs/" + location_id)
-      .then(res => res.json())
-      .then(rows => {
-        const list  = document.getElementById("log-list");
-        const panel = document.getElementById("log-panel");
-
-        list.innerHTML = "";
-
-        if (rows.length === 0) {
-          list.innerHTML = '<div class="x-panel-empty">No log entries yet.</div>';
-          panel.style.display = "none";
-          return;
-        }
-
-        rows.forEach(function(r) {
-          const ago = timeAgo(r.log_time) || r.log_time;
-          const row = document.createElement("div");
-          row.className = "x-panel-row";
-          row.innerHTML =
-            '<span style="color:var(--text-secondary);flex:1">👤 ' + r.username + '</span>' +
-            '<span style="color:var(--text-muted);font-size:11.5px;flex:1;text-align:center">' + ago + '</span>' +
-            '<span class="recent-status ' + r.status_reported + '" style="margin-right:8px">' + r.status_reported + '</span>' +
-            '<span class="log-action">' + r.action + '</span>';
-          list.appendChild(row);
-        });
-
-        panel.style.display = "block";
-      })
-      .catch(() => {});
-  }
-
-  // ══════════════════════════════════════════════
-  //  AGG FUNCTIONS + CALC FIELD: System Stats
-  //  GET /stats
-  // ══════════════════════════════════════════════
-  let statsVisible = false;
-
-  function toggleStats() {
-    statsVisible = !statsVisible;
-    const panel = document.getElementById("stats-panel");
-    const btn   = document.getElementById("btn-stats");
-
-    if (statsVisible) {
-      panel.style.display = "block";
-      btn.textContent = "📊 Hide System Stats";
-      fetch(API + "/stats")
-        .then(res => res.json())
-        .then(d => {
-          document.getElementById("st-total").textContent    = d.total_reports;
-          document.getElementById("st-off-rate").textContent = d.off_rate_pct + "%";
-          document.getElementById("st-subs").textContent     = d.total_subscriptions;
-          document.getElementById("st-logs").textContent     = d.total_log_entries;
-          document.getElementById("st-busiest").textContent  =
-            d.busiest_area ? d.busiest_area.area_name + " (" + d.busiest_area.report_count + " reports)" : "—";
-        })
-        .catch(() => {});
-    } else {
-      panel.style.display = "none";
-      btn.textContent = "📊 Show System Stats";
-    }
   }
 </script>
 
